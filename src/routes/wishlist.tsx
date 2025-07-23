@@ -1,24 +1,13 @@
 import Like from "@/components/shared/Like";
 import StoreLayout from "@/layouts/StoreLayout";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { getProductByIds, getWishlistedProductsIds } from "@/lib/api";
-import supabase from "@/lib/supabase";
+import { getProductByIds } from "@/lib/api";
+import useLikeStore from "@/lib/store/like";
 
 export const Route = createFileRoute("/wishlist")({
   component: Wishlist,
   loader: async () => {
-    const { data: user } = await supabase.auth.getSession();
-    if (user.session) {
-      const wishlistedProductsIds = await getWishlistedProductsIds();
-      localStorage.setItem("liked", JSON.stringify(wishlistedProductsIds));
-
-      const products = await getProductByIds(wishlistedProductsIds);
-      return products;
-    }
-    const likes = localStorage.getItem("liked")
-      ? JSON.parse(localStorage.getItem("liked") || "[]")
-      : [];
-
+    const likes = useLikeStore.getState().likes;
     if (likes.length > 0) {
       const products = await getProductByIds(likes);
       return products;

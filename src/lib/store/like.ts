@@ -8,9 +8,7 @@ interface LikeStore {
 }
 
 const useLikeStore = create<LikeStore>((set) => ({
-  likes: localStorage.getItem("liked")
-    ? JSON.parse(localStorage.getItem("liked") || "[]")
-    : [],
+  likes: [],
   setLikes: (likes: number[]) => {
     localStorage.setItem("liked", JSON.stringify(likes));
     set({ likes });

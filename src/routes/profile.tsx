@@ -1,8 +1,9 @@
 import StoreLayout from "@/layouts/StoreLayout";
 import Addresses from "@/components/profile/Addresses";
-import { redirect, createFileRoute } from "@tanstack/react-router";
+import { redirect, createFileRoute, useNavigate } from "@tanstack/react-router";
 import supabase from "@/lib/supabase";
 import { getProfileData } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/profile")({
   component: Profile,
@@ -22,6 +23,7 @@ async function profileLoader() {
 
 export default function Profile() {
   const profile = Route.useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <StoreLayout>
@@ -39,6 +41,17 @@ export default function Profile() {
             </div>
           </div>
           <Addresses addresses={profile.addresses} />
+
+          <Button
+            onClick={() => {
+              supabase.auth.signOut();
+              navigate({ to: "/" });
+            }}
+            className="m-4 cursor-pointer"
+            variant={"destructive"}
+          >
+            Logout
+          </Button>
         </div>
       </div>
     </StoreLayout>

@@ -1,24 +1,17 @@
 import CarouselProducts from "@/components/CarouselProducts";
 import BestProduct from "@/components/BestProduct";
 import { AnimatedTestimonials } from "@/components/AnimatedTestimonialProducts";
-import { fetchHomeProducts, getWishlistedProductsIds } from "@/lib/api";
+import { fetchHomeProducts } from "@/lib/api";
 import { createFileRoute } from "@tanstack/react-router";
 import StoreLayout from "@/layouts/StoreLayout";
-import supabase from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   component: Home,
   loader: homeProductsLoader,
+  staleTime: 1000 * 30,
 });
 
 async function homeProductsLoader() {
-  const { data: user } = await supabase.auth.getSession();
-
-  if (user.session) {
-    const wishlistedProductsIds = await getWishlistedProductsIds();
-    localStorage.setItem("liked", JSON.stringify(wishlistedProductsIds));
-  }
-
   return fetchHomeProducts();
 }
 

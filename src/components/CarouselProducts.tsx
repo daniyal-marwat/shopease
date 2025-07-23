@@ -3,25 +3,43 @@ import type { Product } from "@/data/productTypes";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
+function getProductToShow(width: number) {
+  if (width > 1520) {
+    return 5;
+  }
+  if (width > 1280) {
+    return 4;
+  }
+  if (width > 1024) {
+    return 3;
+  }
+  if (width > 610) {
+    return 2;
+  }
+  return 1;
+}
+
 export default function CarouselProducts({
   products,
 }: {
   products: Product[];
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [productsToShow, setProductsToShow] = useState(
-    window.innerWidth > 630 ? 4 : 1
-  );
+  const [productsToShow, setProductsToShow] = useState(() => {
+    let currentWidth = window.innerWidth;
+    return getProductToShow(currentWidth);
+  });
   const total = products.length;
 
   useEffect(() => {
-    window.addEventListener("resize", () => {
-      setProductsToShow(window.innerWidth > 630 ? 4 : 1);
-    });
+    function hadnleResize() {
+      let currentWidth = window.innerWidth;
+      setProductsToShow(getProductToShow(currentWidth));
+    }
+
+    window.addEventListener("resize", hadnleResize);
     return () => {
-      window.removeEventListener("resize", () => {
-        setProductsToShow(window.innerWidth > 630 ? 4 : 1);
-      });
+      window.removeEventListener("resize", hadnleResize);
     };
   }, []);
 

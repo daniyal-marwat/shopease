@@ -14,9 +14,9 @@ export default function HeroProductCard({
       to={`/product/$productId`}
       params={{ productId: id.toString() }}
       preload="intent"
-      preloadDelay={1000}
+      preloadDelay={500}
     >
-      <div className="h-48 md:h-[520px] m-auto bg-black/40 overflow-hidden rounded-xl relative">
+      <div className="h-56 md:h-[720px] m-auto bg-black/40 overflow-hidden rounded-xl relative">
         <img
           className="object-cover object-center h-full w-full"
           src={picture_url}

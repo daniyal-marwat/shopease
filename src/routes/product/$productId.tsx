@@ -5,6 +5,7 @@ import Like from "@/components/shared/Like";
 import { useState } from "react";
 import type { Product } from "@/data/productTypes";
 import { getProductById } from "@/lib/api";
+import useCartStore from "@/lib/store/cart";
 
 export const Route = createFileRoute("/product/$productId")({
   component: Product,
@@ -23,14 +24,19 @@ function Product() {
   const [quantity, setQuantity] = useState(1);
 
   const product = Route.useLoaderData();
+  const { addToCart, updateQuantity } = useCartStore();
 
   if (!product) {
     return <NotFound />;
   }
 
+  const alreadyInCart = useCartStore((state) =>
+    state.cart.some((item) => item.id === product.id)
+  );
+
   return (
     <StoreLayout>
-      <div className="m-12 md:mx-0 flex justify-around flex-col md:flex-row gap-24">
+      <div className="m-12 md:mx-0 flex justify-around flex-col md:flex-row ">
         <div className="w-full md:w-96 flex-shrink-0 rounded-2xl overflow-hidden">
           <img
             className="w-full object-cover object-center"
@@ -61,8 +67,7 @@ function Product() {
                 className=" rounded-none"
                 variant="ghost"
                 onClick={() => {
-                  if (product.out_of_stock || quantity === product.item_left)
-                    return;
+                  if (product.out_of_stock) return;
                   setQuantity((prev) => prev + 1);
                 }}
               >
@@ -72,6 +77,13 @@ function Product() {
             <div className="flex gap-4 w-full items-center justify-center mt-8">
               <Button
                 disabled={product.out_of_stock}
+                onClick={() => {
+                  if (alreadyInCart) {
+                    updateQuantity(product.id, quantity);
+                  } else {
+                    addToCart(product.id, quantity);
+                  }
+                }}
                 className="w-full px-0 cursor-pointer"
               >
                 {product.out_of_stock ? "Out of stock" : "Add to cart"}

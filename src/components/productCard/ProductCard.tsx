@@ -27,7 +27,7 @@ export default function ProductCard({
       to={"/product/$productId"}
       params={{ productId: id.toString() }}
       preload="intent"
-      preloadDelay={1000}
+      preloadDelay={500}
     >
       <Card className="w-2xs h-80 p-0 overflow-hidden justify-between relative ">
         <CardContent className="p-0  relative">

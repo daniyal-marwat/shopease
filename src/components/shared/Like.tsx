@@ -10,6 +10,7 @@ export default function Like({ id }: { id: number }) {
 
   const [like, setLike] = useState(likes.includes(id));
   const [showBubble, setShowBubble] = useState(false);
+
   const { user } = useAuth();
 
   useEffect(() => {

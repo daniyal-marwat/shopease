@@ -81,7 +81,7 @@ export const AnimatedTestimonials = ({
                     to={`/product/$productId`}
                     params={{ productId: testimonial.id.toString() }}
                     preload="intent"
-                    preloadDelay={1000}
+                    preloadDelay={500}
                   >
                     <img
                       src={testimonial.picture_url}

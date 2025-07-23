@@ -41,7 +41,7 @@ export default function NavBar() {
             </Button>
           </Link>
         </div>
-        <Link to={"/"}>
+        <Link to={"/cart"}>
           <Button className="rounded-full" variant={"secondary"}>
             <ShoppingBasket />
           </Button>
