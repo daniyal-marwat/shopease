@@ -1,0 +1,94 @@
+import { createFileRoute } from "@tanstack/react-router";
+import StoreLayout from "@/layouts/StoreLayout";
+import { Button } from "@/components/ui/button";
+import Like from "@/components/shared/Like";
+import { useState } from "react";
+import type { Product } from "@/data/productTypes";
+import { getProductById } from "@/lib/api";
+
+export const Route = createFileRoute("/product/$productId")({
+  component: Product,
+  pendingComponent: () => (
+    <div className="flex items-center justify-center h-screen font-bold">
+      Loading...
+    </div>
+  ),
+  pendingMs: 10,
+  loader: async ({ params }) => {
+    return getProductById(params.productId);
+  },
+});
+
+function Product() {
+  const [quantity, setQuantity] = useState(1);
+
+  const product = Route.useLoaderData();
+
+  if (!product) {
+    return <NotFound />;
+  }
+
+  return (
+    <StoreLayout>
+      <div className="m-12 md:mx-0 flex justify-around flex-col md:flex-row gap-24">
+        <div className="w-full md:w-96 flex-shrink-0 rounded-2xl overflow-hidden">
+          <img
+            className="w-full object-cover object-center"
+            src={product.picture_url}
+            alt={product.name}
+          />
+        </div>
+        <div className="flex flex-col justify-between min-w-0 flex-shrink">
+          <div>
+            <h1 className="text-4xl font-semibold">{product.name}</h1>
+            <p className="text-xl font-semibold mt-4">${product.price}</p>
+            <p className="mt-4 text-sm text-gray-500">{product.description}</p>
+          </div>
+          <div className="mt-4">
+            <div className="border-2 w-fit  rounded flex items-center gap-2">
+              <Button
+                className=" rounded-none"
+                variant="ghost"
+                onClick={() => {
+                  if (product.out_of_stock || quantity === 1) return;
+                  setQuantity((prev) => prev - 1);
+                }}
+              >
+                -
+              </Button>
+              <span>{quantity}</span>
+              <Button
+                className=" rounded-none"
+                variant="ghost"
+                onClick={() => {
+                  if (product.out_of_stock || quantity === product.item_left)
+                    return;
+                  setQuantity((prev) => prev + 1);
+                }}
+              >
+                +
+              </Button>
+            </div>
+            <div className="flex gap-4 w-full items-center justify-center mt-8">
+              <Button
+                disabled={product.out_of_stock}
+                className="w-full px-0 cursor-pointer"
+              >
+                {product.out_of_stock ? "Out of stock" : "Add to cart"}
+              </Button>
+              <Like id={product.id} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </StoreLayout>
+  );
+}
+
+export function NotFound() {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <p>Error 404: Product not found</p>
+    </div>
+  );
+}
