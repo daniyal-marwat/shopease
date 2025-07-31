@@ -9,6 +9,12 @@ export const Route = createFileRoute("/")({
   component: Home,
   loader: homeProductsLoader,
   staleTime: 1000 * 30,
+  pendingComponent: () => (
+    <div className="flex items-center justify-center h-screen">
+      <p className="font-bold">Loading...</p>
+    </div>
+  ),
+  pendingMs: 0,
 });
 
 async function homeProductsLoader() {

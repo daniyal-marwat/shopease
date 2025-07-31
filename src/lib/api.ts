@@ -1,6 +1,11 @@
 import supabase from "./supabase.js";
 import type { Product } from "../data/productTypes.js";
-import type { Address } from "@/components/profile/Addresses.js";
+import type { Address } from "@/types/address.js";
+import { clearLocalStorage, getBaseUrl } from "./utils.js";
+import type { FilterParamsType } from "@/schemas/filter.js";
+import type { Profile } from "@/types/profile.js";
+import { toastMessage } from "./toastMessage.js";
+
 
 export async function fetchHomeProducts(): Promise<{
   newArrivals: Product[];
@@ -48,7 +53,7 @@ export async function getProductById(
   return data;
 }
 
-export async function getProductByIds(ids: number[]): Promise<Product[]> {
+export async function getProductsByIds(ids: number[]): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -61,17 +66,7 @@ export async function getProductByIds(ids: number[]): Promise<Product[]> {
   return data;
 }
 
-export async function getWishlistedProducts(): Promise<
-  { product_id: number; user_id: string; id: number }[]
-> {
-  const { data, error } = await supabase.from("wishlisted_items").select("*");
-
-  if (error || !data) {
-    return [];
-  }
-
-  return data;
-}
+// Authenticated
 export async function getWishlistedProductsIds(): Promise<number[]> {
   const { data, error } = await supabase
     .from("wishlisted_items")
@@ -95,7 +90,7 @@ export async function addWishListProductToDB(
 
   if (error) {
     console.error("Error adding to wishlist:", error);
-    throw error;
+    toastMessage("Error adding to wishlist: "+error.message, "error");
   }
 }
 
@@ -110,8 +105,7 @@ export async function removeWishListProductFromDB(
     .eq("product_id", id);
 
   if (error) {
-    console.error("Error removing from wishlist:", error);
-    throw error;
+    toastMessage("Error removing from wishlist: "+error.message, "error");
   }
 }
 
@@ -122,53 +116,236 @@ export async function updateAddress(address: Address) {
     .eq("id", address.id);
 
   if (error) {
-    console.error("Error updating address:", error);
-    throw error;
+    toastMessage("Error updating address: "+error.message, "error");
   }
 }
 
 export async function addAddress({
   is_default = false,
   ...address
-}: {
-  first_name: string;
-  last_name: string;
-  address: string;
-  city: string;
-  zip_code?: string;
-  is_default?: boolean;
-}) {
+}: Omit<Address, "id">) {
   const { error } = await supabase.from("addresses").insert({
     ...address,
     is_default,
-  });
+  });     
 
   if (error) {
-    console.error("Error adding address:", error);
-    throw error;
+    toastMessage("Error adding address: "+error.message, "error");
   }
 }
 
-export async function getProfileData() {
+export async function getProfileData(): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
     .select(`*,addresses(*)`)
     .order("id", { ascending: true, referencedTable: "addresses" })
     .single();
 
-  if (error || !data) {
-    console.error("Error getting profile data:", error);
-    throw error;
+
+    
+
+  if (error) {
+    toastMessage("Error getting profile data: "+error.message, "error");
   }
 
-  return data;
+  return data as Profile | null;  
 }
 
 export async function deleteAddress(id: number) {
   const { error } = await supabase.from("addresses").delete().eq("id", id);
 
   if (error) {
-    console.error("Error deleting address:", error);
+    toastMessage("Error deleting address: "+error.message, "error");
+  }
+}
+
+export async function getCartItemsFromDB(): Promise<
+  { product_id: number; quantity: number }[]
+> {
+  const { data, error } = await supabase
+    .from("cart_items")
+    .select("product_id,quantity");
+
+  if (error ) {
+    toastMessage("Error getting cart items: "+error.message, "error");
+    return [];
+  }
+  
+  return data;
+}
+
+export async function insertCartItemToDB(product_id: number, quantity: number) {
+  const { error } = await supabase
+    .from("cart_items")
+    .insert({ product_id, quantity });
+
+  if (error) {
+    toastMessage("Error inserting cart item: "+error.message, "error");
+  }
+}
+
+export async function updateCartItemInDB(product_id: number, quantity: number) {
+  const { error } = await supabase
+    .from("cart_items")
+    .update({ quantity })
+    .eq("product_id", product_id);
+
+  if (error) {
+    toastMessage("Error updating cart item: "+error.message, "error");
+  }
+}
+
+export async function deleteCartItemFromDB(product_id: number) {
+  const { error } = await supabase
+    .from("cart_items")
+    .delete()
+    .eq("product_id", product_id);
+
+  if (error) {
+    toastMessage("Error deleting cart item: "+error.message, "error");
+  }
+}
+
+export async function logOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    toastMessage("Error logging out: "+error.message, "error");
+  }
+
+  clearLocalStorage();
+
+  window.location.href = "/";
+}
+
+interface SearchProducts extends FilterParamsType {
+  search: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function getSearchProducts({
+  search,
+  limit = 20,
+  offset = 0,
+  sort,
+  priceRange,
+}: SearchProducts): Promise<Product[]> {
+  if (!search.trim()) return [];
+
+  let query = supabase
+    .from("products")
+    .select("*")
+    .ilike("name", `%${search}%`);
+
+  if (priceRange) {
+    query = query.gte("price", priceRange);
+  }
+
+  if (sort === "asc" || sort === "desc") {
+    query = query.order("price", { ascending: sort === "asc" });
+  } else if (sort === "popular") {
+    query = query.order("id", { ascending: false });
+  }
+
+  query = query.range(offset, offset + limit-1);
+
+  const { data, error } = await query;
+
+  if (error || !data) {
+    console.error("Error getting search products:", error);
     throw error;
   }
+
+  return data;
+}
+
+
+interface CategoryProducts extends FilterParamsType {
+  category: string;
+  offset?: number;
+  limit?: number;
+}
+
+export async function getCatergoryProducts({category,limit=20,offset=0,sort,priceRange}:CategoryProducts): Promise<Product[]> { 
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("category", category)
+
+  if (priceRange) {
+    query = query.gte("price", priceRange);
+  }
+
+  if (sort === "asc" || sort === "desc") {
+    query = query.order("price", { ascending: sort === "asc" });
+  } else if (sort === "popular") {
+    query = query.order("id", { ascending: false });
+  }
+
+  query = query.range(offset, offset + limit-1);
+
+  const { data, error } = await query;
+
+  if (error || !data) {
+    console.error("Error getting category products:", error);
+    throw error;
+  }
+
+  return data;
+}
+
+
+
+export async function signUp(email:string,password:string,fullname:string) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) {
+    throw error;
+  }
+  await insertUser(fullname,email);
+
+  return data;
+}
+
+
+export async function insertUser(fullname:string,email:string) {
+  const { data, error } = await supabase.from("profiles").insert({ full_name:fullname, email });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function login(email:string,password:string) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+
+export async function updateUserPassword(password:string) {
+  const { data, error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function resetPasswordForEmail(email:string) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email,{
+  redirectTo:`${getBaseUrl()}/update-password`
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }

@@ -4,8 +4,15 @@ import { Button } from "@/components/ui/button";
 import Like from "@/components/shared/Like";
 import { useState } from "react";
 import type { Product } from "@/data/productTypes";
-import { getProductById } from "@/lib/api";
+import {
+  getProductById,
+  insertCartItemToDB,
+  updateCartItemInDB,
+} from "@/lib/api";
 import useCartStore from "@/lib/store/cart";
+import { useAuth } from "@/context/AuthContext";
+import { toastMessage } from "@/lib/toastMessage";
+import { getResizedImageUrl } from "@/lib/utils";
 
 export const Route = createFileRoute("/product/$productId")({
   component: Product,
@@ -14,15 +21,21 @@ export const Route = createFileRoute("/product/$productId")({
       Loading...
     </div>
   ),
-  pendingMs: 10,
+  pendingMs: 0,
   loader: async ({ params }) => {
     return getProductById(params.productId);
   },
 });
 
+const imageVariations = [
+  { style: "ar_16:9,c_fill,g_auto,f_auto,q_auto,w_480", width: 480 },
+  { style: "ar_1:1,c_fill,g_auto,f_auto,q_auto,w_800", width: 800 },
+  { style: "ar_4:5,c_fill,g_auto,f_auto,q_auto,w_1200", width: 1200 },
+];
+
 function Product() {
   const [quantity, setQuantity] = useState(1);
-
+  const { user } = useAuth();
   const product = Route.useLoaderData();
   const { addToCart, updateQuantity } = useCartStore();
 
@@ -31,20 +44,27 @@ function Product() {
   }
 
   const alreadyInCart = useCartStore((state) =>
-    state.cart.some((item) => item.id === product.id)
+    state.cart.some((item) => item.product_id === product.id)
   );
 
   return (
     <StoreLayout>
-      <div className="m-12 md:mx-0 flex justify-around flex-col md:flex-row ">
-        <div className="w-full md:w-96 flex-shrink-0 rounded-2xl overflow-hidden">
+      <div className="m-12 md:mx-0 flex justify-around flex-col gap-8 md:flex-row ">
+        <div className="w-fit md:h-fit md:w-md flex-shrink-0 rounded-2xl overflow-hidden">
           <img
-            className="w-full object-cover object-center"
+            className="w-full h-full aspect-auto object-cover"
             src={product.picture_url}
+            srcSet={imageVariations
+              .map(
+                (variant) =>
+                  `${getResizedImageUrl(product.picture_url, variant.style)} ${variant.width}w`
+              )
+              .join(",")}
+            sizes="(min-width: 1024px) 600px, (min-width: 768px) 400px, 100vw"
             alt={product.name}
           />
         </div>
-        <div className="flex flex-col justify-between min-w-0 flex-shrink">
+        <div className="flex flex-col justify-between max-w-md">
           <div>
             <h1 className="text-4xl font-semibold">{product.name}</h1>
             <p className="text-xl font-semibold mt-4">${product.price}</p>
@@ -78,10 +98,13 @@ function Product() {
               <Button
                 disabled={product.out_of_stock}
                 onClick={() => {
+                  toastMessage("Product added to cart", "accomplishment");
                   if (alreadyInCart) {
                     updateQuantity(product.id, quantity);
+                    if (user) updateCartItemInDB(product.id, quantity);
                   } else {
                     addToCart(product.id, quantity);
+                    if (user) insertCartItemToDB(product.id, quantity);
                   }
                 }}
                 className="w-full px-0 cursor-pointer"
@@ -99,8 +122,10 @@ function Product() {
 
 export function NotFound() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Error 404: Product not found</p>
-    </div>
+    <StoreLayout>
+      <div className="flex items-center justify-center h-screen">
+        <p>Error 404: Product not found</p>
+      </div>
+    </StoreLayout>
   );
 }

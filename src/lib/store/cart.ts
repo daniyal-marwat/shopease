@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-interface CartItem {
-  id: number;
+export interface CartItem {
+  product_id: number;
   quantity: number;
 }
 
@@ -23,18 +23,20 @@ const useCartStore = create<CartStore>((set) => ({
     set((state) => {
       localStorage.setItem(
         "cart",
-        JSON.stringify([...state.cart, { id, quantity }])
+        JSON.stringify([...state.cart, { product_id: id, quantity }])
       );
-      return { cart: [...state.cart, { id, quantity }] };
+      return { cart: [...state.cart, { product_id: id, quantity }] };
     }),
   removeFromCart: (id: number) =>
     set((state) => {
       localStorage.setItem(
         "cart",
-        JSON.stringify(state.cart.filter((item: CartItem) => item.id !== id))
+        JSON.stringify(
+          state.cart.filter((item: CartItem) => item.product_id !== id)
+        )
       );
       return {
-        cart: state.cart.filter((item: CartItem) => item.id !== id),
+        cart: state.cart.filter((item: CartItem) => item.product_id !== id),
       };
     }),
   updateQuantity: (id: number, quantity: number) =>
@@ -43,13 +45,13 @@ const useCartStore = create<CartStore>((set) => ({
         "cart",
         JSON.stringify(
           state.cart.map((item: CartItem) =>
-            item.id === id ? { ...item, quantity } : item
+            item.product_id === id ? { ...item, quantity } : item
           )
         )
       );
       return {
         cart: state.cart.map((item: CartItem) =>
-          item.id === id ? { ...item, quantity } : item
+          item.product_id === id ? { ...item, quantity } : item
         ),
       };
     }),

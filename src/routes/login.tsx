@@ -1,9 +1,14 @@
 import { LoginForm } from "@/components/auth/LoginForm";
-import { useAsync } from "@/hooks/useAsync";
-import type { AuthTokenResponse } from "@supabase/supabase-js";
 import supabase from "../lib/supabase";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  redirect,
+  useNavigate,
+  type SearchSchemaInput,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
+import { login } from "@/lib/api";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -13,9 +18,9 @@ export const Route = createFileRoute("/login")({
       return redirect({ to: "/" });
     }
   },
-  validateSearch: (search: { redirect?: string }) => {
+  validateSearch: (search: { redirect?: string } & SearchSchemaInput) => {
     const redirect =
-      typeof search.redirect === "string" ? search.redirect : "/";
+      typeof search.redirect === "string" ? search.redirect : undefined;
     return { redirect };
   },
 });
@@ -29,7 +34,11 @@ function LoginPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") {
-        navigate({ to: redirectUrl });
+        navigate({
+          to: redirectUrl || "/",
+          replace: true,
+          reloadDocument: true,
+        });
       }
     });
 
@@ -38,18 +47,21 @@ function LoginPage() {
     };
   }, []);
 
-  const { loading, error, run, data } = useAsync<AuthTokenResponse>();
+  const mutation = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      login(email, password),
+  });
 
   function handleLogin(email: string, password: string) {
-    run(supabase.auth.signInWithPassword({ email, password }));
+    mutation.mutate({ email, password });
   }
 
   return (
     <div className="flex items-center justify-center h-screen max-w-sm m-auto">
       <LoginForm
         onSubmit={handleLogin}
-        error={data?.error || error}
-        loading={loading}
+        error={mutation.error}
+        loading={mutation.isPending}
       />
     </div>
   );

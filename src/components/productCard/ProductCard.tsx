@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription } from "../ui/card";
 import { Link } from "@tanstack/react-router";
 import Like from "../shared/Like";
+import type { Ref } from "react";
 
 interface ProductCardProps {
   id: number;
@@ -10,6 +11,7 @@ interface ProductCardProps {
   item_left?: number;
   new_arrival?: boolean;
   out_of_stock?: boolean;
+  ref?: Ref<HTMLDivElement>;
 }
 
 export default function ProductCard({
@@ -20,16 +22,20 @@ export default function ProductCard({
   item_left,
   new_arrival,
   out_of_stock,
+  ref,
 }: ProductCardProps) {
   return (
     <Link
-      className="inline-block rounded-xl "
+      className="inline-block rounded-xl"
       to={"/product/$productId"}
       params={{ productId: id.toString() }}
       preload="intent"
       preloadDelay={500}
     >
-      <Card className="w-2xs h-80 p-0 overflow-hidden justify-between relative ">
+      <Card
+        className="w-2xs h-80 p-0 overflow-hidden justify-between relative "
+        ref={ref}
+      >
         <CardContent className="p-0  relative">
           <img
             src={picture_url}
@@ -44,11 +50,11 @@ export default function ProductCard({
         </CardContent>
         <CardDescription className="px-2 pb-4">
           <div className="flex justify-between">
-            <p className=" font-medium text-black">{name}</p>
+            <p className=" font-medium">{name}</p>
             <Like id={id} />
           </div>
           <div className="flex justify-between items-center">
-            <p className="font-semibold text-black text-lg mt-2">${price}</p>
+            <p className="font-semibold text-lg mt-2">${price}</p>
             {item_left !== undefined && item_left <= 10 && item_left > 0 && (
               <div className="text-xs text-red-500 translate-y-1">
                 {item_left} items left!

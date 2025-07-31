@@ -1,26 +1,44 @@
 import SignupForm from "@/components/auth/SignupForm";
-import { useAsync } from "@/hooks/useAsync";
-import type { AuthResponse } from "@supabase/supabase-js";
-import supabase from "../lib/supabase";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { signUp } from "@/lib/api";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
 function SignupPage() {
-  const { data, error, run, loading } = useAsync<AuthResponse>();
+  const navigate = useNavigate();
 
-  function handleSignup(email: string, password: string) {
-    run(supabase.auth.signUp({ email, password }));
+  const signupMutation = useMutation({
+    mutationFn: ({
+      email,
+      password,
+      fullname,
+    }: {
+      email: string;
+      password: string;
+      fullname: string;
+    }) => signUp(email, password, fullname),
+    onSuccess: () => {
+      navigate({
+        to: "/",
+        replace: true,
+        reloadDocument: true,
+      });
+    },
+  });
+
+  function handleSignup(email: string, password: string, fullname: string) {
+    signupMutation.mutate({ email, password, fullname });
   }
 
   return (
     <div className="flex items-center max-w-sm h-screen m-auto">
       <SignupForm
-        loading={loading}
+        loading={signupMutation.isPending}
         onSubmit={handleSignup}
-        error={error || data?.error}
+        error={signupMutation.error}
       />
     </div>
   );

@@ -1,30 +1,17 @@
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { LabelInput } from "../ui/labelInput";
-import { useEffect, useState } from "react";
-import { toastMessage } from "@/lib/toastMessage";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 interface Props {
   onSubmit: (email: string) => void;
-  error: Error | null;
   loading: boolean;
   success: boolean;
 }
 
-export default function ForgotForm({
-  onSubmit,
-  error,
-  loading,
-  success,
-}: Props) {
+export default function ForgotForm({ onSubmit, loading, success }: Props) {
   const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    if (success)
-      toastMessage("The password reset link has been sent.", "accomplishment");
-    if (error) toastMessage(error.message, "error");
-  }, [success, error]);
 
   return (
     <Card className="w-full shadow-2xl">
@@ -32,23 +19,29 @@ export default function ForgotForm({
         <h1>Forgot password</h1>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSubmit(email);
-          }}
-        >
-          <LabelInput
-            name="Email"
-            type="email"
-            placeholder="Enter your email"
-            required
-            onValueChange={(value) => setEmail(value)}
-          />
-          <Button disabled={loading} className="w-full cursor-pointer mt-6">
-            Reset password
-          </Button>
-        </form>
+        {success ? (
+          <p className="text-center text-green-500">
+            The password reset link has been sent.
+          </p>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit(email);
+            }}
+          >
+            <LabelInput
+              name="Email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              onValueChange={(value) => setEmail(value)}
+            />
+            <Button disabled={loading} className="w-full cursor-pointer mt-6">
+              Reset password
+            </Button>
+          </form>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col">
         <div className="h-[1px] bg-gray-400/40 rounded my-2 w-full"></div>

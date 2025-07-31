@@ -10,22 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductProductIdRouteImport } from './routes/product/$productId'
+import { Route as CategoryCategoryRouteImport } from './routes/category/$category'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
+  id: '/update-password',
+  path: '/update-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -58,6 +71,11 @@ const ProductProductIdRoute = ProductProductIdRouteImport.update({
   path: '/product/$productId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
+  id: '/category/$category',
+  path: '/category/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,8 +83,11 @@ export interface FileRoutesByFullPath {
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/wishlist': typeof WishlistRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
 export interface FileRoutesByTo {
@@ -75,8 +96,11 @@ export interface FileRoutesByTo {
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/wishlist': typeof WishlistRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
 export interface FileRoutesById {
@@ -86,8 +110,11 @@ export interface FileRoutesById {
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/wishlist': typeof WishlistRoute
+  '/category/$category': typeof CategoryCategoryRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
 export interface FileRouteTypes {
@@ -98,8 +125,11 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/login'
     | '/profile'
+    | '/search'
     | '/signup'
+    | '/update-password'
     | '/wishlist'
+    | '/category/$category'
     | '/product/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +138,11 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/login'
     | '/profile'
+    | '/search'
     | '/signup'
+    | '/update-password'
     | '/wishlist'
+    | '/category/$category'
     | '/product/$productId'
   id:
     | '__root__'
@@ -118,8 +151,11 @@ export interface FileRouteTypes {
     | '/forgot'
     | '/login'
     | '/profile'
+    | '/search'
     | '/signup'
+    | '/update-password'
     | '/wishlist'
+    | '/category/$category'
     | '/product/$productId'
   fileRoutesById: FileRoutesById
 }
@@ -129,8 +165,11 @@ export interface RootRouteChildren {
   ForgotRoute: typeof ForgotRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
+  UpdatePasswordRoute: typeof UpdatePasswordRoute
   WishlistRoute: typeof WishlistRoute
+  CategoryCategoryRoute: typeof CategoryCategoryRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
 }
 
@@ -143,11 +182,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WishlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/update-password': {
+      id: '/update-password'
+      path: '/update-password'
+      fullPath: '/update-password'
+      preLoaderRoute: typeof UpdatePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -192,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category/$category': {
+      id: '/category/$category'
+      path: '/category/$category'
+      fullPath: '/category/$category'
+      preLoaderRoute: typeof CategoryCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -201,8 +261,11 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotRoute: ForgotRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
+  UpdatePasswordRoute: UpdatePasswordRoute,
   WishlistRoute: WishlistRoute,
+  CategoryCategoryRoute: CategoryCategoryRoute,
   ProductProductIdRoute: ProductProductIdRoute,
 }
 export const routeTree = rootRouteImport

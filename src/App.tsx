@@ -6,6 +6,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
+import { ThemeProvider } from "./context/ThemeContext";
 // import WishlistProvider from "./components/providers/WishlistProvider";
 
 // Create the router
@@ -24,7 +25,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div>
         <AuthProvider>
-          <RouterProvider router={router} />
+          <ThemeProvider defaultTheme="system">
+            <RouterProvider router={router} />
+          </ThemeProvider>
         </AuthProvider>
         {/* <WishlistProvider /> */}
         <Toaster theme="system" position="top-right" />

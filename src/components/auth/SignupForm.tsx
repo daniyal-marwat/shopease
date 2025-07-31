@@ -9,7 +9,7 @@ import { Link } from "@tanstack/react-router";
 import { toastMessage } from "@/lib/toastMessage";
 
 interface Props {
-  onSubmit: (email: string, password: string) => void;
+  onSubmit: (email: string, password: string, fullname: string) => void;
   error: Error | undefined | null;
   loading: boolean;
 }
@@ -17,6 +17,7 @@ interface Props {
 export default function SignupForm({ onSubmit, error, loading }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullname, setFullname] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [inputError, setInputError] = useState("");
 
@@ -44,10 +45,7 @@ export default function SignupForm({ onSubmit, error, loading }: Props) {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            // const form = new FormData(e.target as HTMLFormElement);
-            // const fullName = form.get("fullname");
-
-            onSubmit(email, password);
+            onSubmit(email, password, fullname);
           }}
         >
           <LabelInput
@@ -55,6 +53,9 @@ export default function SignupForm({ onSubmit, error, loading }: Props) {
             placeholder="Enter your full name"
             required
             data-testid="full-name-input"
+            onValueChange={(value) => {
+              setFullname(value);
+            }}
           />
           <LabelInput
             type="email"

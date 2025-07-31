@@ -66,7 +66,7 @@ export default function CarouselProducts({
     setCurrentIndex((prev) => (prev - productsToShow + total) % total);
   };
   return (
-    <div className="flex justify-center overflow-x-scroll gap-4 relative">
+    <div className="flex justify-center gap-4 relative">
       {productsToDisplay.map((product: Product) => {
         return (
           <ProductCard

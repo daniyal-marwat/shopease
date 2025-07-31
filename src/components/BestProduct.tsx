@@ -10,7 +10,7 @@ export default function BestProduct({ products }: { products: Product[] }) {
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % products.length);
-    }, 3000);
+    }, 100000);
     return () => {
       timerRef.current && clearInterval(timerRef.current);
     };
